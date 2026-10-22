@@ -14,7 +14,8 @@
   <p class="eyebrow">Neil's DRP Scheduler</p>
   <h1>Hello, {{ member.name }}</h1>
   <p class="lead">
-    Thank you for serving on my committee. Please mark your availability between
+    Thank you for serving on my committee. Please mark your availability for a
+    {{ DRP.duration_hours }}-hour slot between
     <strong>{{ WINDOW.start.strftime('%b %-d') }} – {{ WINDOW.end.strftime('%b %-d') }}</strong>.
   </p>
 </div>
