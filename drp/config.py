@@ -29,10 +29,10 @@ DRP = {
 SCHEDULE_WINDOW = {
     "start": date(2026, 11, 2),
     "end": date(2026, 12, 4),
-    # Monday=0 … Sunday=6 (Python convention). Weekdays only by default.
-    "allowed_weekdays": {0, 1, 2, 3, 4},
-    # Holidays / days to skip (Thanksgiving week here).
-    "excluded_dates": {date(2026, 11, 26), date(2026, 11, 27)},
+    # Monday=0 … Sunday=6 (Python convention). Mon–Thu (advisor unavailable Fridays).
+    "allowed_weekdays": {0, 1, 2, 3},
+    # Holidays / days to skip: the whole Thanksgiving week (Nov 23–27).
+    "excluded_dates": {date(2026, 11, d) for d in range(23, 28)},
 }
 
 # Members mark availability in 1-hour cells between DAY_START and DAY_END (24h).
