@@ -14,8 +14,8 @@
   <p class="eyebrow">Neil's DRP Scheduler</p>
   <h1>Hello, {{ member.name }}</h1>
   <p class="lead">
-    Thank you for serving on my committee. Please mark <strong>every hour</strong> you are free
-    between {{ fmt_date(WINDOW.start, 'month_day') }} and {{ fmt_date(WINDOW.end, 'full') }};
+    Thank you for serving on my committee. Please mark your availability between
+    <strong>{{ WINDOW.start.strftime('%b %-d') }} – {{ WINDOW.end.strftime('%b %-d') }}</strong>;
     I will pick a {{ DRP.duration_hours }}-hour window (e.g. 10 AM – 12 PM).
   </p>
 </div>
