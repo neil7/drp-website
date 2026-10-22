@@ -36,12 +36,12 @@ SCHEDULE_WINDOW = {
 }
 
 # Members mark availability in 1-hour cells between DAY_START and DAY_END (24h).
-# 9 / 20 => cells 9–10 AM through 7–8 PM. The dashboard then finds every
+# 9 / 17 => cells 9–10 AM through 4–5 PM. The dashboard then finds every
 # `duration_hours`-long window (e.g. 10 AM–12 PM) where everyone is free.
 DAY_START_HOUR = 9
-DAY_END_HOUR = 20
+DAY_END_HOUR = 17
 
-# Start hour of each 1-hour cell: 9, 10, …, 19.
+# Start hour of each 1-hour cell: 9, 10, …, 16.
 SLOT_START_HOURS = list(range(DAY_START_HOUR, DAY_END_HOUR))
 
 TIME_ZONE_LABEL = "Pacific Time (Eugene, OR)"

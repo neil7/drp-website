@@ -5,8 +5,8 @@ A small Flask website for collecting committee availability for the DRP presenta
 
 | Page | Who | What |
 | --- | --- | --- |
-| `/` | public | "Welcome to Neil's DRP" landing page with project, advisor, committee, format |
-| `/respond/<token>` | one committee member | **Private** hourly grid (9 AM–8 PM). Click/drag to paint free hours; autosaves. A member sees **only their own** answers |
+| `/` | public | Minimal "Neil's DRP Scheduler" landing page pointing members to their private link |
+| `/respond/<token>` | one committee member | **Private** page: project summary (title, advisor, committee, format) + hourly grid (9 AM–5 PM). Click/drag to paint free hours; autosaves. A member sees **only their own** answers |
 | `/admin` | you | Password-protected dashboard: who responded, hourly overlap heatmap, every 2-hour window (any start time) where everyone is free, notes, and each member's private link |
 
 **Stack:** Python 3.10+, Flask, Flask-SQLAlchemy, SQLite (default), vanilla JS/CSS — no build step.
@@ -116,7 +116,7 @@ Suggested email:
 Everything lives in [`drp/config.py`](drp/config.py):
 
 - `SCHEDULE_WINDOW` — start/end date, allowed weekdays, excluded dates (Thanksgiving is excluded by default).
-- `DAY_START_HOUR` / `DAY_END_HOUR` — the hours members can mark (`9` / `20` → 9 AM–8 PM, one cell per hour).
+- `DAY_START_HOUR` / `DAY_END_HOUR` — the hours members can mark (`9` / `17` → 9 AM–5 PM, one cell per hour).
   The dashboard finds every `duration_hours`-long window (any start hour, e.g. 10 AM–12 PM) where everyone is free.
 - `DRP` — title, advisor, committee names/roles, contact email, duration.
 

@@ -1,4 +1,6 @@
 {% extends "base.html" %}
+{# Header logo links back to this member's own page rather than the public homepage. #}
+{% set brand_href = url_for('main.respond', token=member.token) %}
 {% block title %}{{ member.name }} · Neil's DRP{% endblock %}
 
 {% block header_right %}
@@ -9,29 +11,50 @@
 
 {% block content %}
 <div class="page-head">
-  <p class="eyebrow">Availability for Neil's DRP</p>
+  <p class="eyebrow">Neil's DRP Scheduler</p>
   <h1>Hello, {{ member.name }}</h1>
   <p class="lead">
-    Please mark <strong>every hour</strong> you are free. Neil will pick a
-    {{ DRP.duration_hours }}-hour window (e.g. 10 AM – 12 PM) inside the time that works for
-    the whole committee, so the more hours you mark, the easier it is to find one.
+    Thank you for serving on my committee. Please mark <strong>every hour</strong> you are free
+    between {{ fmt_date(WINDOW.start, 'month_day') }} and {{ fmt_date(WINDOW.end, 'full') }};
+    I will pick a {{ DRP.duration_hours }}-hour window (e.g. 10 AM – 12 PM).
   </p>
 </div>
 
+<section class="card project-strip">
+  <div class="project-head">
+    <h2 class="project-title">
+      <span class="accent">{{ DRP.short_title }}:</span> {{ DRP.title }}
+    </h2>
+    <div class="pill-row">
+      <span class="pill">{{ DRP.duration_hours }} hours</span>
+      <span class="pill">Public talk + private Q&amp;A</span>
+    </div>
+  </div>
+  <dl class="facts">
+    <div><dt>Student</dt><dd>{{ DRP.student_name }}</dd></div>
+    <div><dt>Advisor</dt><dd>{{ DRP.advisor }}</dd></div>
+    <div>
+      <dt>Committee</dt>
+      <dd>
+        <ul class="people compact">
+          {% for m in DRP.committee %}
+          <li>
+            <span class="avatar">{{ m.name.replace('Dr.', '').split() | map('first') | join('') }}</span>
+            <span>
+              <span class="person-name">{{ m.name }}</span>
+              <span class="person-role">{{ m.role }}</span>
+            </span>
+          </li>
+          {% endfor %}
+        </ul>
+      </dd>
+    </div>
+    <div class="wide"><dt>Format</dt><dd>{{ DRP.format }}</dd></div>
+  </dl>
+</section>
+
 <div class="respond-layout">
   <aside class="side">
-    <div class="card side-card">
-      <h3>How to use</h3>
-      <ul class="tips">
-        <li>Each cell is <strong>one hour</strong>. Click to toggle it.</li>
-        <li><strong>Drag</strong> down a column to paint a stretch of hours.</li>
-        <li>Click a <strong>date header</strong> to mark the whole day.</li>
-        <li>Changes <strong>save automatically</strong>.</li>
-      </ul>
-      <p class="muted small">Hours shown: {{ fmt_hour_short(SLOT_HOURS[0]) }} – {{ fmt_hour_short(SLOT_HOURS[-1] + 1) }},
-        {{ TZ_LABEL }}. Your answers are private to Neil — other committee members cannot see them.</p>
-    </div>
-
     <div class="card side-card stat-card">
       <div class="stat">
         <span class="stat-num" id="count">{{ selected | length }}</span>
@@ -45,16 +68,22 @@
       <div class="side-actions">
         <button type="button" class="btn btn-ghost btn-sm" id="clear-all">Clear all</button>
       </div>
+      <p class="muted small" style="margin: 14px 0 0">
+        Times are {{ TZ_LABEL }}. Your responses are visible only to me.
+      </p>
     </div>
 
     <div class="card side-card">
-      <label for="note">Anything Neil should know? <span class="muted">(optional)</span></label>
+      <label for="note">Anything I should know? <span class="muted">(optional)</span></label>
       <textarea id="note" rows="4" maxlength="2000"
-        placeholder="e.g. Mornings preferred; traveling the week of Nov 16.">{{ member.note or '' }}</textarea>
+        placeholder="{% if member.note %}Note sent. Add another if needed.{% else %}e.g. Mornings preferred; traveling the week of Nov 16.{% endif %}"></textarea>
+      <button type="button" class="btn btn-block" id="submit-btn">Submit</button>
+      <p class="muted small" style="margin: 10px 0 0">Grid changes are also saved automatically as you go.</p>
     </div>
   </aside>
 
   <section class="grid-area" id="grid-area" data-token="{{ member.token }}">
+    <p class="grid-hint muted small">Click or drag to mark free hours · click a date to mark the whole day · saves automatically</p>
     <div class="week-nav" role="tablist">
       {% for week in weeks %}
       <button type="button" class="week-tab{% if loop.first %} active{% endif %}" role="tab"

@@ -20,6 +20,7 @@
   const statusText = statusEl ? statusEl.querySelector(".save-text") : null;
   const toastEl = document.getElementById("toast");
   const clearBtn = document.getElementById("clear-all");
+  const submitBtn = document.getElementById("submit-btn");
 
   const totalSlots = cells.length;
   const selected = new Set(cells.filter((c) => c.classList.contains("on")).map((c) => c.dataset.key));
@@ -90,24 +91,31 @@
     saveTimer = setTimeout(save, delay == null ? 700 : delay);
   }
 
-  async function save() {
+  // `includeNote` is only true for the explicit Submit button; autosave never
+  // sends the note, so the stored note is untouched by grid changes.
+  async function save(includeNote) {
+    clearTimeout(saveTimer);
     saveTimer = null;
     if (inFlight) {
       queued = true;
-      return;
+      return false;
     }
     inFlight = true;
     setStatus("saving", "Saving…");
+    let ok = false;
     try {
+      const payload = { token, slots: Array.from(selected) };
+      if (includeNote) payload.note = noteEl.value;
       const res = await fetch("/api/availability", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token, slots: Array.from(selected), note: noteEl.value }),
+        body: JSON.stringify(payload),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || "Save failed (" + res.status + ")");
       setStatus("saved", "Saved");
       showLastSaved(data.updated_at);
+      ok = true;
     } catch (err) {
       setStatus("error", "Not saved");
       toast(err.message || "Could not save. Check your connection and try again.", true);
@@ -118,7 +126,32 @@
         save();
       }
     }
+    return ok;
   }
+
+  // Explicit submit: flush any pending autosave immediately and confirm.
+  submitBtn.addEventListener("click", async () => {
+    submitBtn.disabled = true;
+    const original = submitBtn.textContent;
+    submitBtn.textContent = "Submitting…";
+    const hadNote = noteEl.value.trim().length > 0;
+    const ok = await save(true);
+    if (ok) {
+      if (hadNote) {
+        noteEl.value = "";
+        noteEl.placeholder = "Note sent. Add another if needed.";
+      }
+      submitBtn.textContent = "Submitted ✓";
+      toast(selected.size ? "Thank you — your availability has been submitted." : "Submitted with no hours marked.", false);
+      setTimeout(() => {
+        submitBtn.textContent = original;
+        submitBtn.disabled = false;
+      }, 2500);
+    } else {
+      submitBtn.textContent = original;
+      submitBtn.disabled = false;
+    }
+  });
 
   function changed() {
     refreshSummary();
@@ -192,9 +225,6 @@
     changed();
     toast("Cleared all blocks");
   });
-
-  // Note autosave (debounced)
-  noteEl.addEventListener("input", () => scheduleSave(1200));
 
   // ---------- week tabs ----------
   let currentWeek = 0;

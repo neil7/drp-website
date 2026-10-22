@@ -147,6 +147,9 @@ textarea { resize: vertical; min-height: 90px; }
 .hero .btn { background: var(--yellow); color: var(--green-900); border-color: var(--yellow); }
 .hero .btn:hover { background: #fff; border-color: #fff; }
 .hero-hint { color: #b9d5c5; font-size: 0.9rem; }
+.hero-hint a { color: var(--yellow); }
+.hero-tall { flex: 1; padding: 96px 0 110px; }
+.hero-tall .hero-sub + .hero-sub { margin-top: -10px; }
 .hero-glow {
   position: absolute; right: -120px; bottom: -160px; width: 420px; height: 420px; border-radius: 50%;
   background: radial-gradient(circle, rgba(254, 225, 35, 0.22), transparent 65%); pointer-events: none;
@@ -208,6 +211,14 @@ ul.people li, .person-cell { display: flex; align-items: center; gap: 10px; }
 @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
 
 .grid-area { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow-sm); padding: 18px 20px 20px; user-select: none; }
+
+.grid-hint { margin: 0 0 12px; }
+.project-strip { padding: 18px 22px; }
+.project-strip .project-head { margin-bottom: 12px; }
+.project-strip .project-title { font-size: 1.15rem; }
+ul.people.compact { gap: 6px; }
+ul.people.compact .avatar { width: 28px; height: 28px; font-size: 0.68rem; }
+ul.people.compact .person-name { font-size: 0.93rem; }
 
 .week-nav { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 12px; border-bottom: 1px solid var(--line); margin-bottom: 18px; scrollbar-width: thin; }
 .week-tab {
@@ -296,7 +307,7 @@ details.near .best-list { margin-top: 10px; }
 .table th { text-align: left; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-3); padding: 0 10px 10px; border-bottom: 1px solid var(--line); }
 .table td { padding: 12px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
 .table tr:last-child td { border-bottom: 0; }
-.note-cell { max-width: 260px; color: var(--ink-2); }
+.note-cell { max-width: 260px; color: var(--ink-2); white-space: pre-line; }
 .link-cell { display: flex; align-items: center; gap: 8px; }
 .link-cell code { font-size: 0.75rem; background: var(--bg); padding: 4px 8px; border-radius: 6px; word-break: break-all; }
 

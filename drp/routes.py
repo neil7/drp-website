@@ -15,9 +15,8 @@ from flask import (
     url_for,
 )
 
-from .config import SLOT_START_HOURS
 from .models import Member, db, replace_availability
-from .slots import find_windows, schedule_dates, slot_key, valid_slot_keys, weeks, window_hours
+from .slots import find_windows, slot_key, valid_slot_keys, weeks, window_hours
 
 bp = Blueprint("main", __name__)
 
@@ -29,12 +28,7 @@ bp = Blueprint("main", __name__)
 
 @bp.get("/")
 def index():
-    dates = schedule_dates()
-    return render_template(
-        "index.html",
-        n_days=len(dates),
-        n_slots=len(dates) * len(SLOT_START_HOURS),
-    )
+    return render_template("index.html")
 
 
 @bp.get("/respond/<token>")
@@ -73,8 +67,15 @@ def save_availability():
     valid = valid_slot_keys()
     chosen = {s for s in slots if s in valid}
 
-    note = data.get("note")
-    note = note.strip()[:2000] if isinstance(note, str) and note.strip() else None
+    # Notes are messages: only sent on explicit Submit, appended to earlier ones.
+    # Autosave omits the key entirely, which leaves the stored note untouched.
+    note = member.note
+    if "note" in data:
+        new = data.get("note")
+        new = new.strip()[:2000] if isinstance(new, str) else ""
+        if new:
+            note = f"{member.note}\n\n{new}" if member.note else new
+            note = note[:4000]
 
     replace_availability(member, chosen, note)
     return jsonify(ok=True, saved=len(chosen), updated_at=member.updated_at_iso)
