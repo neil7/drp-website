@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% block title %}Dashboard · Neil's DRP{% endblock %}
+
+{% block header_right %}
+<form method="post" action="{{ url_for('main.admin_logout') }}">
+  <button class="btn btn-ghost btn-sm" type="submit">Sign out</button>
+</form>
+{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <p class="eyebrow">Admin dashboard</p>
+  <h1>Committee availability</h1>
+  <p class="lead">Members mark free hours; the list below shows every {{ DRP.duration_hours }}-hour
+    window where the whole committee is free. Starred cells in the heatmap belong to one of those windows.</p>
+</div>
+
+<div class="kpis">
+  <div class="kpi">
+    <span class="kpi-num">{{ responded }}<span class="kpi-of">/{{ total }}</span></span>
+    <span class="kpi-label">members responded</span>
+  </div>
+  <div class="kpi kpi-good">
+    <span class="kpi-num">{{ everyone | length }}</span>
+    <span class="kpi-label">{{ DRP.duration_hours }}-hour windows where everyone is free</span>
+  </div>
+  <div class="kpi">
+    <span class="kpi-num">{{ near | length }}</span>
+    <span class="kpi-label">windows missing just one person</span>
+  </div>
+</div>
+
+<section class="card">
+  <h2>Best options</h2>
+  {% if everyone %}
+  <ul class="best-list">
+    {% for d, start, _ in everyone %}
+    <li>
+      <span class="best-date">{{ fmt_date(d, 'long') }}</span>
+      <span class="best-time">{{ fmt_range(start) }}</span>
+      <span class="badge badge-good">All {{ total }}</span>
+    </li>
+    {% endfor %}
+  </ul>
+  {% elif not near %}
+  <p class="muted">Nothing yet — waiting on responses.</p>
+  {% endif %}
+
+  {% if near %}
+  <details class="near" {% if not everyone %}open{% endif %}>
+    <summary class="muted">
+      {% if everyone %}Also close{% else %}No {{ DRP.duration_hours }}-hour window works for everyone yet. Closest{% endif %}
+      — {{ near | length }} window{{ '' if near | length == 1 else 's' }} missing one person
+    </summary>
+    <ul class="best-list">
+      {% for d, start, missing in near %}
+      <li>
+        <span class="best-date">{{ fmt_date(d, 'long') }}</span>
+        <span class="best-time">{{ fmt_range(start) }}</span>
+        <span class="badge">Missing {{ name_of[missing[0]] }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+  </details>
+  {% endif %}
+</section>
+
+<section class="card">
+  <h2>Responses &amp; private links</h2>
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr><th>Member</th><th>Status</th><th>Blocks</th><th>Note</th><th>Private link</th></tr>
+      </thead>
+      <tbody>
+        {% for m in members %}
+        <tr>
+          <td>
+            <div class="person-cell">
+              <span class="avatar">{{ m.initials }}</span>
+              <span><span class="person-name">{{ m.name }}</span><span class="person-role">{{ m.role or '' }}</span></span>
+            </div>
+          </td>
+          <td>
+            {% if m.updated_at %}
+            <span class="badge badge-good">Responded</span>
+            <div class="muted small">{{ fmt_dt_local(m.updated_at) }}</div>
+            {% else %}
+            <span class="badge">Waiting</span>
+            {% endif %}
+          </td>
+          <td>{{ m.slot_keys | length }}</td>
+          <td class="note-cell">{{ m.note or '—' }}</td>
+          <td>
+            <div class="link-cell">
+              <code>{{ base_url }}/respond/{{ m.token }}</code>
+              <button type="button" class="btn btn-ghost btn-xs copy-btn"
+                data-copy="{{ base_url }}/respond/{{ m.token }}">Copy</button>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="heat-section">
+  <div class="section-head">
+    <h2>Overlap heatmap</h2>
+    <div class="legend">
+      <span><i class="sw sw-0"></i>0</span>
+      <span><i class="sw sw-1"></i>1</span>
+      {% if total > 2 %}<span><i class="sw sw-2"></i>2</span>{% endif %}
+      <span><i class="sw sw-all"></i>All {{ total }}</span>
+      <span><i class="sw sw-all sw-star"></i>Part of a {{ DRP.duration_hours }}-hour window</span>
+    </div>
+  </div>
+
+  {% for week in weeks %}
+  <div class="card heat-week">
+    <div class="heat-week-title">Week of {{ fmt_date(week[0], 'month_day') }}</div>
+    <div class="grid heat-grid" style="--cols: {{ week | length }}">
+      <div class="grid-corner"></div>
+      {% for d in week %}
+      <div class="grid-day static">
+        <span class="day-dow">{{ d.strftime('%a') }}</span>
+        <span class="day-num">{{ d.strftime('%-d') }}</span>
+        <span class="day-mon">{{ d.strftime('%b') }}</span>
+      </div>
+      {% endfor %}
+      {% for h in SLOT_HOURS %}
+      <div class="grid-time">
+        <span class="time-main">{{ fmt_hour_short(h) }}</span>
+        <span class="time-sub">to {{ fmt_hour_short(h + 1) }}</span>
+      </div>
+      {% for d in week %}
+      {% set key = slot_key(d, h) %}
+      {% set who = by_slot.get(key, []) %}
+      {% set n = who | length %}
+      <div class="heat {% if n == 0 %}h0{% elif n == total %}hall{% else %}h{{ n }}{% endif %}{% if key in star_keys %} star{% endif %}"
+        data-tip="{{ fmt_date(d, 'long') }}, {{ fmt_range(h, 1) }}&#10;{% if who %}{{ who | map(attribute='name') | join(', ') }}{% else %}No one yet{% endif %}">
+        {% for m in who %}<span class="heat-initial">{{ m.initials }}</span>{% endfor %}
+      </div>
+      {% endfor %}
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+</section>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/admin.js') }}" defer></script>
+{% endblock %}

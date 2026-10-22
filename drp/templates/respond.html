@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block title %}{{ member.name }} · Neil's DRP{% endblock %}
+
+{% block header_right %}
+<span class="save-status" id="save-status" data-state="idle">
+  <span class="dot"></span><span class="save-text">{% if member.updated_at %}Saved{% else %}Not yet saved{% endif %}</span>
+</span>
+{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <p class="eyebrow">Availability for Neil's DRP</p>
+  <h1>Hello, {{ member.name }}</h1>
+  <p class="lead">
+    Please mark <strong>every hour</strong> you are free. Neil will pick a
+    {{ DRP.duration_hours }}-hour window (e.g. 10 AM – 12 PM) inside the time that works for
+    the whole committee, so the more hours you mark, the easier it is to find one.
+  </p>
+</div>
+
+<div class="respond-layout">
+  <aside class="side">
+    <div class="card side-card">
+      <h3>How to use</h3>
+      <ul class="tips">
+        <li>Each cell is <strong>one hour</strong>. Click to toggle it.</li>
+        <li><strong>Drag</strong> down a column to paint a stretch of hours.</li>
+        <li>Click a <strong>date header</strong> to mark the whole day.</li>
+        <li>Changes <strong>save automatically</strong>.</li>
+      </ul>
+      <p class="muted small">Hours shown: {{ fmt_hour_short(SLOT_HOURS[0]) }} – {{ fmt_hour_short(SLOT_HOURS[-1] + 1) }},
+        {{ TZ_LABEL }}. Your answers are private to Neil — other committee members cannot see them.</p>
+    </div>
+
+    <div class="card side-card stat-card">
+      <div class="stat">
+        <span class="stat-num" id="count">{{ selected | length }}</span>
+        <span class="stat-label">hours marked free</span>
+      </div>
+      <div class="progress"><div class="progress-bar" id="progress"></div></div>
+      <p class="muted small" id="last-saved"
+         data-updated="{{ member.updated_at_iso or '' }}">
+        {% if member.updated_at %}Last saved {{ member.updated_at.strftime('%b %-d, %-I:%M %p') }} UTC{% else %}No response yet{% endif %}
+      </p>
+      <div class="side-actions">
+        <button type="button" class="btn btn-ghost btn-sm" id="clear-all">Clear all</button>
+      </div>
+    </div>
+
+    <div class="card side-card">
+      <label for="note">Anything Neil should know? <span class="muted">(optional)</span></label>
+      <textarea id="note" rows="4" maxlength="2000"
+        placeholder="e.g. Mornings preferred; traveling the week of Nov 16.">{{ member.note or '' }}</textarea>
+    </div>
+  </aside>
+
+  <section class="grid-area" id="grid-area" data-token="{{ member.token }}">
+    <div class="week-nav" role="tablist">
+      {% for week in weeks %}
+      <button type="button" class="week-tab{% if loop.first %} active{% endif %}" role="tab"
+        data-week="{{ loop.index0 }}">
+        <span class="week-tab-label">Week {{ loop.index }}</span>
+        <span class="week-tab-dates">{{ fmt_date(week[0], 'month_day') }} – {{ week[-1].strftime('%-d') }}</span>
+        <span class="week-tab-count" data-week-count="{{ loop.index0 }}"></span>
+      </button>
+      {% endfor %}
+    </div>
+
+    {% for week in weeks %}
+    {% set week_idx = loop.index0 %}
+    <div class="week-panel{% if loop.first %} active{% endif %}" data-week="{{ week_idx }}">
+      <div class="grid" style="--cols: {{ week | length }}">
+        <div class="grid-corner"></div>
+        {% for d in week %}
+        <button type="button" class="grid-day" data-day="{{ d.isoformat() }}" title="Toggle whole day">
+          <span class="day-dow">{{ d.strftime('%a') }}</span>
+          <span class="day-num">{{ d.strftime('%-d') }}</span>
+          <span class="day-mon">{{ d.strftime('%b') }}</span>
+        </button>
+        {% endfor %}
+
+        {% for h in SLOT_HOURS %}
+        <div class="grid-time">
+          <span class="time-main">{{ fmt_hour_short(h) }}</span>
+          <span class="time-sub">to {{ fmt_hour_short(h + 1) }}</span>
+        </div>
+        {% for d in week %}
+        {% set key = d.isoformat() ~ '|' ~ h %}
+        <button type="button" class="cell{% if key in selected %} on{% endif %}"
+          data-key="{{ key }}" data-day="{{ d.isoformat() }}" data-week="{{ week_idx }}"
+          aria-pressed="{{ 'true' if key in selected else 'false' }}"
+          aria-label="{{ fmt_date(d, 'long') }}, {{ fmt_range(h, 1) }}">
+          <span class="cell-check">✓</span>
+        </button>
+        {% endfor %}
+        {% endfor %}
+      </div>
+    </div>
+    {% endfor %}
+
+    <div class="week-pager">
+      <button type="button" class="btn btn-ghost btn-sm" id="prev-week">← Previous week</button>
+      <button type="button" class="btn btn-ghost btn-sm" id="next-week">Next week →</button>
+    </div>
+  </section>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/respond.js') }}" defer></script>
+{% endblock %}

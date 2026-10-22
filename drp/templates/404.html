@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Link not found · Neil's DRP{% endblock %}
+
+{% block content %}
+<div class="login-wrap">
+  <div class="card login-card">
+    <p class="eyebrow">404</p>
+    <h1>That link isn't valid</h1>
+    <p class="muted">If you're a committee member, double-check the private link from Neil's email,
+      or reach out at <a href="mailto:{{ DRP.contact_email }}">{{ DRP.contact_email }}</a>.</p>
+    <a class="btn btn-ghost" href="{{ url_for('main.index') }}">← Back to home</a>
+  </div>
+</div>
+{% endblock %}

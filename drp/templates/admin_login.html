@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Admin · Neil's DRP{% endblock %}
+
+{% block content %}
+<div class="login-wrap">
+  <form method="post" class="card login-card">
+    <p class="eyebrow">Admin</p>
+    <h1>Committee dashboard</h1>
+    <p class="muted">Sign in to see everyone's availability and the overlap.</p>
+    {% if error %}<div class="alert alert-error">{{ error }}</div>{% endif %}
+    <label for="password">Password</label>
+    <input id="password" name="password" type="password" autocomplete="current-password" autofocus required>
+    <button class="btn btn-block" type="submit">Sign in</button>
+  </form>
+</div>
+{% endblock %}

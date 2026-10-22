@@ -1,0 +1,22 @@
+# Render.com blueprint (optional alternative to PythonAnywhere).
+# NOTE: Render's free web service has an ephemeral disk, so SQLite data is lost on
+# redeploy/restart. If you deploy here, set DATABASE_URL to a free Neon Postgres
+# database and add `psycopg[binary]` to requirements.txt.
+services:
+  - type: web
+    name: neil-drp-scheduler
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt && flask --app app init-db
+    startCommand: gunicorn app:app
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12"
+      - key: FLASK_ENV
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: DATABASE_URL
+        sync: false

@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Welcome to Neil's DRP{% endblock %}
+{% block main_class %}{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <div class="container hero-inner">
+    <p class="eyebrow">Directed Research Project · Scheduling</p>
+    <h1 class="hero-title">Welcome to <span class="accent">Neil's DRP</span></h1>
+    <p class="hero-sub">
+      Thank you for serving on my committee. This page helps us find a
+      {{ DRP.duration_hours }}-hour window for the presentation and private questioning
+      between <strong>{{ fmt_date(WINDOW.start, 'month_day') }}</strong> and
+      <strong>{{ fmt_date(WINDOW.end, 'full') }}</strong>.
+    </p>
+    <div class="hero-actions">
+      <a class="btn btn-lg" href="#how">How it works ↓</a>
+      <span class="hero-hint">Committee members: use the private link from Neil's email.</span>
+    </div>
+  </div>
+  <div class="hero-glow" aria-hidden="true"></div>
+</section>
+
+<div class="container">
+  <section class="card project-card">
+    <div class="project-head">
+      <div>
+        <p class="eyebrow">Project</p>
+        <h2 class="project-title">
+          <span class="accent">{{ DRP.short_title }}:</span> {{ DRP.title }}
+        </h2>
+      </div>
+      <div class="pill-row">
+        <span class="pill">{{ DRP.duration_hours }} hours</span>
+        <span class="pill">Public talk + private Q&amp;A</span>
+      </div>
+    </div>
+
+    <dl class="facts">
+      <div><dt>Student</dt><dd>{{ DRP.student_name }}</dd></div>
+      <div><dt>Advisor</dt><dd>{{ DRP.advisor }}</dd></div>
+      <div>
+        <dt>Committee</dt>
+        <dd>
+          <ul class="people">
+            {% for m in DRP.committee %}
+            <li>
+              <span class="avatar">{{ m.name.replace('Dr.', '').split() | map('first') | join('') }}</span>
+              <span>
+                <span class="person-name">{{ m.name }}</span>
+                <span class="person-role">{{ m.role }}</span>
+              </span>
+            </li>
+            {% endfor %}
+          </ul>
+        </dd>
+      </div>
+      <div class="wide"><dt>Format</dt><dd>{{ DRP.format }}</dd></div>
+    </dl>
+  </section>
+
+  <section id="how" class="steps">
+    <div class="step">
+      <span class="step-num">1</span>
+      <h3>Open your private link</h3>
+      <p>Each committee member receives a unique link by email. It's yours alone — no login needed.</p>
+    </div>
+    <div class="step">
+      <span class="step-num">2</span>
+      <h3>Paint your availability</h3>
+      <p>Click or drag across every hour you're free ({{ fmt_hour_short(SLOT_HOURS[0]) }}–{{ fmt_hour_short(SLOT_HOURS[-1] + 1) }}, {{ TZ_LABEL }}). Neil will pick a {{ DRP.duration_hours }}-hour window inside the time that works for everyone.</p>
+    </div>
+    <div class="step">
+      <span class="step-num">3</span>
+      <h3>Done — it saves automatically</h3>
+      <p>Your availability is saved as you go. Come back anytime using the same link to update it.</p>
+    </div>
+  </section>
+
+  <p class="fineprint">
+    Didn't receive a link, or something isn't working? Email
+    <a href="mailto:{{ DRP.contact_email }}">{{ DRP.contact_email }}</a>.
+  </p>
+</div>
+{% endblock %}
