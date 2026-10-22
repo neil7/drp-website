@@ -7,7 +7,7 @@ from datetime import date
 
 DRP = {
     "student_name": "Neil Sharma",
-    "title": "Efficient Machine Unlearning via First-Order Taylor Approximation",
+    "title": "Machine Unlearning via Curvature-Aware Gradient Ascent",
     "short_title": "Caffeine",
     "department": "Department of Computer Science",
     "school": "School of Computer and Data Sciences, University of Oregon",
