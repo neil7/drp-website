@@ -27,12 +27,13 @@ DRP = {
 
 # Window in which committee members can mark availability.
 SCHEDULE_WINDOW = {
-    "start": date(2026, 11, 2),
-    "end": date(2026, 12, 8),
+    "start": date(2026, 11, 9),
+    "end": date(2026, 12, 10),
     # Monday=0 … Sunday=6 (Python convention). Mon–Thu (advisor unavailable Fridays).
     "allowed_weekdays": {0, 1, 2, 3},
-    # Holidays / days to skip: the whole Thanksgiving week (Nov 23–27).
-    "excluded_dates": {date(2026, 11, d) for d in range(23, 28)},
+    # Skip Thanksgiving week (Nov 23–27) and the first week of December (Nov 30–Dec 4).
+    "excluded_dates": {date(2026, 11, d) for d in range(23, 28)}
+    | {date(2026, 11, 30), date(2026, 12, 1), date(2026, 12, 2), date(2026, 12, 3), date(2026, 12, 4)},
 }
 
 # Members mark availability in 1-hour cells between DAY_START and DAY_END (24h).
